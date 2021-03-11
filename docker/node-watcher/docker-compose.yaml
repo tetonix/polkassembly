@@ -1,0 +1,72 @@
+version: '3.7'
+services:
+  postgres:
+    image: postgres:12.1
+    restart: always
+    # we don't need to expose to localhost, but may be useful
+    # for debugging
+    # ports:
+    #   - '5432:5432'
+    environment:
+      POSTGRES_USER: prisma
+      POSTGRES_PASSWORD: prisma
+    # volumes:
+    #   - postgres:/var/lib/postgresql/data
+  prisma:
+    image: prismagraphql/prisma:1.34
+    depends_on: 
+      - postgres
+    restart: always
+    # We want the admin section of prisma to be closed to the public,
+    # so we access the db using the chain-db-open-server on :4000
+    # We don't need to expose to localhost, but may be useful
+    # for debugging
+    # ports:
+    #   - '4466:4466'
+    environment:
+      PRISMA_CONFIG: |
+        port: 4466
+        databases:
+          default:
+            connector: postgres
+            host: postgres
+            user: prisma
+            password: prisma
+            rawAccess: true
+            port: 5432
+            migrations: true
+  db-open-server:
+    image: paritytech/polkassembly-chain-db-open-server:v0-8-53-1a6eebbf
+    restart: always
+    depends_on: 
+      - prisma
+    ports:
+      - '4000:4000'
+    # 1. waits for prisma to be available
+    # 2. launchs the open server
+    command: |
+      /bin/sh -c "
+        wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.1.0/wait-for | sh -s -- prisma:4466 -- \
+        yarn start
+      "
+    environment: 
+      PRISMA_ENDPOINT: http://prisma:4466
+  scraper:
+    image: paritytech/polkassembly-node-watcher:v0-8-53-1a6eebbf
+    depends_on: 
+      - postgres
+      - prisma
+    # 1. waits for prisma to be available
+    # 2. migrates the db schema
+    # 3. launchs the scraper
+    command: |
+      /bin/sh -c "
+        wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.1.0/wait-for | sh -s -- prisma:4466 -- \
+        yarn prisma1 deploy && \
+        yarn start
+      "
+    environment: 
+      PRISMA_ENDPOINT: http://prisma:4466
+      ARCHIVE_NODE_ENDPOINT: wss://kusama-rpc.polkadot.io
+      MAX_LAG: 1
+      START_FROM: "6448178"

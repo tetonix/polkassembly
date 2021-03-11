@@ -1,0 +1,19 @@
+version: "3.7"
+services:
+  db-watcher:
+    image: paritytech/polkassembly-chain-db-watcher:v0-8-53-1a6eebbf
+    restart: always
+    network_mode: "host"
+    environment:
+      PROPOSAL_BOT_USER_ID: 1
+      PROPOSAL_BOT_USERNAME: bot
+      PROPOSAL_BOT_PASSWORD: proposal_bot_password
+      REACT_APP_HASURA_GRAPHQL_URL: "http://localhost:8080/v1/graphql"
+      CHAIN_DB_GRAPHQL_URL: "http://localhost:4000/"
+      DEMOCRACY_TOPIC_ID: 1
+      COUNCIL_TOPIC_ID: 2
+      TREASURY_TOPIC_ID: 4
+      HASURA_GRAPHQL_ADMIN_SECRET: hasura_admin_secret
+      HASURA_PROPOSAL_POST_TYPE_ID: 2
+      START_FROM: 0
+      HEALTH_PORT: 8019

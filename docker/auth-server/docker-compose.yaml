@@ -1,0 +1,41 @@
+version: "3.7"
+services:
+  redis:
+    image: redis:6.2.1-alpine
+    command: redis-server --requirepass redis --port 6377
+    # ports:
+    #   - "6377:6377"
+  postgres:
+    image: postgres:12.1
+    restart: always
+    # ports:
+    #   - "5433:5433"
+    environment:
+      POSTGRES_USER: authserver
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: governance-auth
+  auth-server:
+    image: paritytech/polkassembly-auth-server:v0-8-53-1a6eebbf
+    restart: "no"
+    ports:
+      - "8010:8010"
+    depends_on:
+      - "redis"
+      - "postgres"
+    environment:
+      NODE_ENV: development
+      PROPOSAL_BOT_USER_ID: 1
+      # keys/secrets
+      JWT_KEY_PASSPHRASE: "qwerty"
+      JWT_PRIVATE_KEY: "-----BEGIN RSA PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\nDEK-Info: DES-EDE3-CBC,FFAD9BE9F537EC87\n\nklRjTettxKj2HQdKHED1dur8MFhM7XCIhqasjAbOk3PV7ywc6OTxoqo21RgYak1X\nOnrqJpZzcyujpW1H/KajZLUvWncZmjJaKBgt7d51yfuSOzGVkk/JFuV4OTuFiYaK\nYdH91hkVhbf2m7Kr1qZESUBGiTDZP3IS+4+7PYYBA07fZbJ5Iad3CI2tDDwfprOA\nSU6EPa4mGbZMxWonjcOnMxh4YFcHdj0bZcOvE8pZKAiBcHM50glGJ/I/RIGHdAHF\nareBiXLo60oy9qBypTCUG9bzxqumhJi95qwOUY4s8zTE6hM7T0XUmh6bEOOGRunM\nrBMg40L1APAoTLHLNPMPvTdBfZWD4emu4aKA+1UjF9IO/nlYRijDMI8snxaUXP5r\n5Irccgy0VZDR/re79tsCNHLOre0GlL5l1RQJp8dJAP+QpO+ytLxp7rH8VxzCtfBh\nkWY4Of12AiKg/w3rw/ZEnp+WQW6lfZfEzC/gRiqXhEDsvjzYNYPhx/zlGq6f6peA\nGSn9+Rx3pKaX+90JK5Vw+zqLWdPrLQTwYuE7ErZ6vVW+ZupIAZWHXOVh0sjKugJh\nZeXzvub4auxkj0VHEg8jio/RmxdLX37UK13+wwSqO/kYf9T5+9ZpGwYjtPdqKmpL\nWQU9Rm6gcp+SlFVIHta+FXMSSdTGy80+zGfC96dJbBYQ2BHDOio2i0r8mI3piZki\naQjMz8e3r2I+QyWfMWEkn41aNUdBU4r7r/ocLf3fsQcLtU99GSvljPdOM09pQlf1\nNJGnlFOLvAysYuE3HZNb2Kovs3YjAadO7TnPUC/ejq8JpDP/Aji8KQ4k1Ss+HKRk\ntn4XGtDqPdAB1wLGAbbxJH4P+JyYQsAFgTWNxv4S3mEspjPhNV5xncoqf1vYbw23\nMxE7o3SWB4q8yNlu6/ssGnvG8Tk/mL5B3TBEX+FS1eceSxsZA9yzCgQGQe958uBy\nEc5tsehiuZ95rdRHIE7EXhcEauL2shVgydpnRnNR+K/cFFsnUHRZQOIdR5Klv3kP\n76OV/Iy2wq1PclGxwmX3i3sk6u5zpk804HsQaP1t9Dnl+br3CR7PVeKH8Stm90U5\nMKpjw8r0EIXzW2/84rmib05ibb8j3swyHtDGfOeW/6wIeIJyi7JCrpj9fp0EH94A\nPG5p/aE82GtCsclUV57rKJFIWlNZ1sQPVU+QhEXwI9j6I1W0cmwGpYhPAeoCd/fE\namC+hBgvqzNXiEI/Xyc58GDA2nqgNbe0FScZRo05yx5J/usnaqMEIa+sfktgXT+0\nvGNmM1ZzmV2+83b/yAznQtav4XfMa6/WhK9bXumLn6sQ4X8The+SdxvjEFYuXwU6\n93XpgIos05QR5PrCpqSehh9/rcJKYBTmQsNq9plchWLPQ39zufZ5aze31WuEtnhc\ncJwgjy7zjctk6fB2LCDA/jErftNkGnPzqi0q5f4+MUaxi4154bHihkx1jAcm2jSk\nFx+n7gcjEJduBfkQKVLpIxJTcOw2wbh8hMnEW4DCkd4eFVywXzhvDEt5Ow96zNkI\nVWPwRw6dcWI7y5OZXel2Ls/yb4gj1eCyhOulP0BPmYGDul8dGdS0OA==\n-----END RSA PRIVATE KEY-----\n"
+      JWT_PUBLIC_KEY: "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA+K3EgHYExGYVGwwVY5if\n//GkWr6usU2hCIBY8n8ZZuPS/oPichgg93ebJllOjNaQU67Ze1LRE9uxqmOyyMdg\n4V3O1FvSRGWzumUdURvRks2CLcj99LaguC1Os5QhM1G+a6F4GNPUTIX73GJJSxQo\n9ljyDKzxItvRWpmVBH77JMR71Vabepgn8w4e3x4PD7YYd9J6yVMa9M07Ij61i+Zm\nGe6DXO8oCZ9tmQD+qCobafQ/L0gVduGFb59PnzApW6dFaTlVckFdwuKmqvAsco3M\nCY6yU2c/K1Np3NPYmkmdwhDYOtvF7KM3At09+juMC6kOOtYGkhi6pu9nfqBerrAb\naQIDAQAB\n-----END PUBLIC KEY-----\n"
+      SENDGRID_API_KEY: ""
+      HASURA_EVENT_SECRET: "hasura_event_secret"
+      # connections/urls
+      DOMAIN_PROTOCOL: "http://"
+      DOMAIN_NAME: "polkassembly.io"
+      PORT: 8010
+      DATABASE_URL: "postgres://authserver:postgres@postgres:5432/governance-auth"
+      REDIS_URL: "redis://:redis@redis:6377"
+      # REACT_APP_AUTH_URL: "http://localhost:8010"
+      # REACT_APP_SERVER_URL: "http://localhost:8080/v1/graphql"

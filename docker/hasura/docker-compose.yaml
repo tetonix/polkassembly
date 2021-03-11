@@ -1,0 +1,60 @@
+version: "3.7"
+services:
+  postgres:
+    image: postgres
+    restart: always
+    ports:
+    - "5434:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: governance-discussion
+      PGDATA: /var/lib/postgresql/data
+    # volumes:
+    # persistent data locally
+    # - /var/polkassembly/hasura/data:/var/lib/postgresql/data
+  graphql-engine:
+    image: hasura/graphql-engine:v1.3.0-beta.2
+    network_mode: "host"
+    command: |
+      /bin/sh -c "
+        echo 'Wait for Postgres...' && sleep 5 && \
+        wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.1.0/wait-for | sh -s -- localhost:5434 -- \
+        echo 'Postgres endpoint is responsive!' && \
+        graphql-engine serve
+      "
+    volumes:
+    # migration data
+      - ../../hasura/hasura-migrations/migrations:/hasura-migrations
+    depends_on:
+      - postgres
+    restart: always
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgres@localhost:5434/governance-discussion
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+      HASURA_GRAPHQL_ADMIN_SECRET: hasura_admin_secret
+      HASURA_GRAPHQL_JWT_SECRET: '{ "type": "RS256", "key": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA+K3EgHYExGYVGwwVY5if\n//GkWr6usU2hCIBY8n8ZZuPS/oPichgg93ebJllOjNaQU67Ze1LRE9uxqmOyyMdg\n4V3O1FvSRGWzumUdURvRks2CLcj99LaguC1Os5QhM1G+a6F4GNPUTIX73GJJSxQo\n9ljyDKzxItvRWpmVBH77JMR71Vabepgn8w4e3x4PD7YYd9J6yVMa9M07Ij61i+Zm\nGe6DXO8oCZ9tmQD+qCobafQ/L0gVduGFb59PnzApW6dFaTlVckFdwuKmqvAsco3M\nCY6yU2c/K1Np3NPYmkmdwhDYOtvF7KM3At09+juMC6kOOtYGkhi6pu9nfqBerrAb\naQIDAQAB\n-----END PUBLIC KEY-----\n" }'
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: 'anonymous'
+      HASURA_COMMENT_CREATE_EVENT_HOOK: "http://localhost:8010/auth/event/comment/create"
+      HASURA_ONCHAIN_LINK_CREATE_HOOK: "http://localhost:8010/auth/event/onchain_link/create"
+      HASURA_EVENT_SECRET: hasura_event_secret
+      HASURA_AUTH_SERVER_REMOTE_SCHEMA: http://localhost:8010/auth/graphql
+      HASURA_CHAIN_DB_REMOTE_SCHEMA: http://localhost:4000
+      # Remote schemas on Mac OS workaround:
+      # HASURA_AUTH_SERVER_REMOTE_SCHEMA: "http://host.docker.internal:8010/auth/graphql"
+      # HASURA_CHAIN_DB_REMOTE_SCHEMA: "http://host.docker.internal:4000"
+  hasura-migrations:
+    image: ctison/hasura-cli:v1.3.0
+    network_mode: "host"
+    depends_on:
+      - graphql-engine
+    volumes:
+      - ../../hasura/hasura-migrations:/home/hasura/hasura-migrations
+      - ./migrations-script.sh:/home/hasura/scripts/migrations-script.sh
+    entrypoint: /bin/bash
+    command: |
+      -c "./scripts/migrations-script.sh && exit 0 || exit 1"
+    environment: 
+      HASURA_PROJECT: hasura-migrations
+      HASURA_ADMIN_SECRET: hasura_admin_secret
