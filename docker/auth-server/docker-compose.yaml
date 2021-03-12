@@ -9,13 +9,13 @@ services:
     image: postgres:12.1
     restart: always
     # ports:
-    #   - "5433:5433"
+    #   - "5433:5432"
     environment:
       POSTGRES_USER: authserver
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: governance-auth
   auth-server:
-    image: paritytech/polkassembly-auth-server:v0-8-53-1a6eebbf
+    image: paritytech/polkassembly-auth-server:v0-8-54-32875d30
     restart: "no"
     ports:
       - "8010:8010"

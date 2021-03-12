@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   react-app:
-    image: mario/polkassembly-front-end:v0-8-53-1a6eebbf
+    image: mario/polkassembly-front-end:v0-8-54-32875d30
     restart: always
     network_mode: "host"
     # ports:
@@ -14,10 +14,8 @@ services:
       # HASURA_GRAPHQL_ADMIN_SECRET: "hasura_admin_secret"
 
 
+# git checkout v0.8.54 && \
+# cd front-end && \
 # docker build . \
-#     -f Dockerfile \
-#     -t mario/polkassembly-front-end:v0-8-53-1a6eebbf \
-#     --build-arg REACT_APP_HASURA_GRAPHQL_URL="http://localhost:8080/v1/graphql" \
-#     --build-arg REACT_APP_JWT_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA+K3EgHYExGYVGwwVY5if\n//GkWr6usU2hCIBY8n8ZZuPS/oPichgg93ebJllOjNaQU67Ze1LRE9uxqmOyyMdg\n4V3O1FvSRGWzumUdURvRks2CLcj99LaguC1Os5QhM1G+a6F4GNPUTIX73GJJSxQo\n9ljyDKzxItvRWpmVBH77JMR71Vabepgn8w4e3x4PD7YYd9J6yVMa9M07Ij61i+Zm\nGe6DXO8oCZ9tmQD+qCobafQ/L0gVduGFb59PnzApW6dFaTlVckFdwuKmqvAsco3M\nCY6yU2c/K1Np3NPYmkmdwhDYOtvF7KM3At09+juMC6kOOtYGkhi6pu9nfqBerrAb\naQIDAQAB\n-----END PUBLIC KEY-----\n" \
-#     --build-arg REACT_APP_NETWORK="kusama" \
-#     --build-arg REACT_APP_WS_PROVIDER="wss://kusama-rpc.polkadot.io"
+#     -f Dockerfile.development \
+#     -t mario/polkassembly-front-end:v0-8-54-32875d30
