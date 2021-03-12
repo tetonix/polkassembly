@@ -31,7 +31,7 @@ echo "-------------------------------------"
 cd $DIR/node-watcher && docker-compose up -d
 
 docker logs node-watcher_scraper_1 -f &
-sleep 20 && kill $(jobs -p | grep '[1]' | cut -d ' ' -f4) &> /dev/null
+sleep 30 && kill $(jobs -p | grep '[1]' | cut -d ' ' -f4) &> /dev/null
 echo
 
 
